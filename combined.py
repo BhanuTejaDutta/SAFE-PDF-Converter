@@ -1,3 +1,5 @@
+
+from platform import python_compiler
 from flask import Flask, render_template, request, redirect, send_file, send_from_directory
 import os
 import pdf2docx
@@ -11,6 +13,8 @@ import PyPDF2
 import pandas as pd
 import fpdf
 from docx import Document
+
+
 
 
 
@@ -91,31 +95,23 @@ def upload_file():
     return send_file(docx_file_path, as_attachment=True)
 
 
-@app.route('/', methods=['POST'])
-def contact():
-    # Get the uploaded file
-    file = request.files['file']
-
-    # Save the file to the uploads folder
-    file.save(f"{app.config['UPLOAD_FOLDER']}/{file.filename}")
-
-    # Convert the Word document to PDF
-    doc = Document(f"{app.config['UPLOAD_FOLDER']}/{file.filename}")
-    pdf = FPDF()
-    
-    for para in doc.paragraphs:
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(0, 10, txt=para.text, ln=1)
-
-    pdf.output(f"{app.config['UPLOAD_FOLDER']}/{file.filename.split('.')[0]}.pdf")
-
-    return render_template('download_word.html', filename=file.filename)
-
-
-
 @app.route('/convert', methods=['POST'])
-def convert():
+def convert_word_to_pdf():
+    file = request.files['file']
+    
+    file.save('uploads/' + file.filename)
+    
+    # Convert the Word document to PDF
+    convert('uploads/' + file.filename, 'uploads/output.pdf')
+   
+    
+    return send_file('uploads/output.pdf', as_attachment=True)
+
+ 
+
+
+@app.route('/', methods=['POST'])
+def develop():
     # Get the uploaded image file
     image_file = request.files['image']
 
